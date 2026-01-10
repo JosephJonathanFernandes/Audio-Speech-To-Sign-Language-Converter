@@ -1,13 +1,61 @@
 {% extends 'base.html' %}
 {% load static %}
 
-
 {% block content %}
-<video width="500" height="380" class="center" autoplay loop>
-  <source src= "{% static 'Hello.mp4' %}" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
-	<div class="form-style" align="middle" >
-	<a href="{% url 'animation' %}"><button class="button">Click to Start</button></a>
-	</div>
+<div class="fade-in">
+    <div class="card text-center">
+        <div class="card-title">
+            <i class="fas fa-sign-language"></i>
+            <h2>Welcome to SignSpeak</h2>
+        </div>
+
+        <div class="mb-4">
+            <video width="500" height="380" class="center" autoplay loop muted>
+                <source src="{% static 'Hello.mp4' %}" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        </div>
+
+        <div class="mb-4">
+            <h3>Transform Spoken Words into Visual Sign Language</h3>
+            <p class="mt-2" style="color: var(--text-secondary); font-size: 1.1rem; max-width: 800px; margin: 0 auto;">
+                SignSpeak is a powerful tool that converts audio speech into Indian Sign Language animations.
+                Whether you want to learn sign language, communicate with the hearing impaired, or explore
+                new ways of expression, our platform makes it easy and accessible.
+            </p>
+        </div>
+
+        <div class="mb-4">
+            <a href="{% url 'animation' %}" class="btn btn-secondary" style="font-size: 1.2rem; padding: 1rem 2rem;">
+                <i class="fas fa-rocket"></i> Get Started Now
+            </a>
+        </div>
+
+        <div class="mt-4" style="display: flex; justify-content: center; gap: 2rem; flex-wrap: wrap;">
+            <div style="text-align: center; flex: 1; min-width: 200px;">
+                <div style="font-size: 2.5rem; color: var(--accent-color); margin-bottom: 0.5rem;">
+                    <i class="fas fa-microphone"></i>
+                </div>
+                <h4>Voice Recognition</h4>
+                <p style="color: var(--text-secondary);">Speak naturally and let our advanced speech recognition convert your words</p>
+            </div>
+
+            <div style="text-align: center; flex: 1; min-width: 200px;">
+                <div style="font-size: 2.5rem; color: var(--accent-color); margin-bottom: 0.5rem;">
+                    <i class="fas fa-language"></i>
+                </div>
+                <h4>Sign Language</h4>
+                <p style="color: var(--text-secondary);">Watch accurate Indian Sign Language animations for each word</p>
+            </div>
+
+            <div style="text-align: center; flex: 1; min-width: 200px;">
+                <div style="font-size: 2.5rem; color: var(--accent-color); margin-bottom: 0.5rem;">
+                    <i class="fas fa-keyboard"></i>
+                </div>
+                <h4>Text Input</h4>
+                <p style="color: var(--text-secondary);">Type your text manually for precise conversion</p>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

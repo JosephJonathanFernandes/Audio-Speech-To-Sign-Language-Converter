@@ -1,133 +1,375 @@
 {% extends 'base.html' %}
 {% load static %}
 
-
 {% block content %}
-<div class="split left">
-	<h2 align="center">Enter Text or Use Mic</h2>
-	<br>
-		<form action="" method="post" align="left">
-		{% csrf_token %}
-					<input type="text" name="sen" class="mytext" id="speechToText" placeholder="">
-					<button type="button" name="button" class="mic" onclick="record()"><img src="{% static 'mic3.png' %}" height="32px" width="38px" /></button>
-		  			&nbsp&nbsp&nbsp&nbsp
-		  			<input type="submit" name="submit" class="submit">
+<div class="card fade-in">
+    <div class="card-title">
+        <i class="fas fa-magic"></i>
+        <h2>Sign Language Converter</h2>
+    </div>
 
-		</form>
-		<br>
-		<table cellspacing="20px">
-			<tr>
-				<td class="td">The text that you entered is:</td>
-				<td class="td">{{ text }}</td>
-			</tr>
-			<tr>
-				<td class="td">Key words in sentence:</td>
-				<td class="td">
-				<ul class="td" id="list" align="center">
-  					{% for word in words %}
-    				<li id="{{ i }}" style="margin-right: 8px">{{ word }}</li>
-  					{% endfor %}
-				</ul>
-			</td>
-		</tr>
-	</table></div>
-  <div class="split right">
-  <h2 align="center">Sign Language Animation</h2>
+    <div class="split-layout">
+        <div class="split-left">
+            <div class="card-title mb-3">
+                <i class="fas fa-keyboard"></i>
+                <h3>Enter Text or Use Microphone</h3>
+            </div>
 
-	<div style="text-align:center">	&nbsp&nbsp
-  	<button class="submit" onclick="playPause()">Play/Pause</button>
-  	<!--  LETS USE ONLY PLAY PAUSE BUTTON WITH 720 *420 ,IT FITS THE SCREEN ASHISH
+            <form action="" method="post" class="mb-4">
+                {% csrf_token %}
+                <div class="text-input-area">
+                    <input type="text" name="sen" class="text-input" id="speechToText"
+                           placeholder="Type your text here or use the microphone..." autocomplete="off">
+                    <button type="button" class="mic-btn" onclick="record()" id="micButton">
+                        <i class="fas fa-microphone"></i>
+                    </button>
+                    <button type="submit" class="btn">
+                        <i class="fas fa-play"></i> Convert
+                    </button>
+                </div>
+            </form>
 
-  	<button onclick="makeBig()">Big</button>
-  	<button onclick="makeSmall()">Small</button>
-  	<button onclick="makeNormal()">Normal</button>-->
+            <div class="card mb-3">
+                <div class="card-title mb-3">
+                    <i class="fas fa-info-circle"></i>
+                    <h3>Conversion Results</h3>
+                </div>
 
+                <div class="mb-3">
+                    <div class="form-label">Original Text:</div>
+                    <div class="word-list">
+                        <div class="word-item" style="flex: 1; min-width: 100%; justify-content: center;">
+                            {{ text|default:"Your converted text will appear here" }}
+                        </div>
+                    </div>
+                </div>
 
-  	<video id="videoPlayer" width="600" height="350"  preload="auto" autoplay>
-    	<source src="" type="video/mp4">
-    Your browser does not support HTML5 video.
-  	</video>
-  	</div></div>
+                <div class="mb-3">
+                    <div class="form-label">Key Words:</div>
+                    <div class="word-list" id="wordList">
+                        {% if words %}
+                            {% for word in words %}
+                                <div class="word-item" id="word-{{ forloop.counter0 }}">{{ word }}</div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="word-item" style="flex: 1; min-width: 100%; justify-content: center;">
+                                Words will appear here after conversion
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
 
+        <div class="split-right">
+            <div class="card-title mb-3">
+                <i class="fas fa-video"></i>
+                <h3>Sign Language Animation</h3>
+            </div>
+
+            <div class="video-container">
+                <video id="videoPlayer" class="video-player" preload="auto">
+                    <source src="" type="video/mp4">
+                    Your browser does not support HTML5 video.
+                </video>
+            </div>
+
+            <div class="video-controls mt-3">
+                <button type="button" class="control-btn" onclick="playPause()" id="playPauseBtn">
+                    <i class="fas fa-play"></i>
+                </button>
+                <button type="button" class="control-btn" onclick="stopVideo()">
+                    <i class="fas fa-stop"></i>
+                </button>
+                <button type="button" class="control-btn" onclick="toggleFullscreen()">
+                    <i class="fas fa-expand"></i>
+                </button>
+            </div>
+
+            <div class="mt-3 text-center">
+                <div class="form-label">Animation Status:</div>
+                <div id="statusDisplay" style="font-weight: 500; color: var(--accent-color);">
+                    Ready to convert text to sign language
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 <script>
-	//webkitSpeechRecognition api for speech to text conversion
-	function record(){
-		var recognition = new webkitSpeechRecognition();
-		recognition.lang='en-IN';
+// Enhanced webkitSpeechRecognition with better error handling and UI feedback
+function record() {
+    const micButton = document.getElementById('micButton');
+    const statusDisplay = document.getElementById('statusDisplay');
+    const speechToText = document.getElementById('speechToText');
 
-		recognition.onresult = function(event){
-			console.log(event)
-			document.getElementById('speechToText').value = event.results[0][0].transcript;
-		}
-		recognition.start();
-	 }
-	function play()
-	{
-		var videoSource = new Array();
-		var	videos = document.getElementById("list").getElementsByTagName("li");
-		var j;
-		for(j=0;j<videos.length;j++)
-		{
-			videoSource[j] = "/static/" + videos[j].innerHTML +".mp4";
-		}
+    // Check if browser supports speech recognition
+    if (!('webkitSpeechRecognition' in window)) {
+        statusDisplay.textContent = "Speech recognition not supported in your browser";
+        statusDisplay.style.color = "#ff4444";
+        return;
+    }
 
-		var i = 0; // define i
-		var videoCount = videoSource.length;
+    // Toggle recording state
+    if (micButton.classList.contains('recording')) {
+        // Stop recording
+        micButton.classList.remove('recording');
+        micButton.innerHTML = '<i class="fas fa-microphone"></i>';
+        statusDisplay.textContent = "Recording stopped";
+        statusDisplay.style.color = "var(--accent-color)";
+        return;
+    }
 
-		function videoPlay(videoNum)
-		{
-			document.getElementById("list").getElementsByTagName("li")[videoNum].style.color = "#09edc7";
-			document.getElementById("list").getElementsByTagName("li")[videoNum].style.fontSize = "xx-large";
-			document.getElementById("videoPlayer").setAttribute("src", videoSource[videoNum]);
-	    	document.getElementById("videoPlayer").load();
-	    	document.getElementById("videoPlayer").play();
+    // Start recording
+    micButton.classList.add('recording');
+    micButton.innerHTML = '<i class="fas fa-microphone-slash"></i>';
+    statusDisplay.textContent = "Listening... Speak now";
+    statusDisplay.style.color = "var(--accent-color)";
 
-		}
-		document.getElementById('videoPlayer').addEventListener('ended', myHandler, false);
-		document.getElementById("list").getElementsByTagName("li")[0].style.color = "#09edc7";
-		document.getElementById("list").getElementsByTagName("li")[0].style.fontSize = "xx-large";
+    const recognition = new webkitSpeechRecognition();
+    recognition.lang = 'en-IN';
+    recognition.interimResults = true;
+    recognition.maxAlternatives = 1;
 
-		videoPlay(0); // play the video
+    recognition.onresult = function(event) {
+        const transcript = event.results[0][0].transcript;
+        speechToText.value = transcript;
 
-		function myHandler()
-		{
-	 		document.getElementById("list").getElementsByTagName("li")[i].style.color = "#feda6a";
-			document.getElementById("list").getElementsByTagName("li")[i].style.fontSize = "20px";
-			i++;
-	    	if (i == videoCount)
-	    	{
-	       	    document.getElementById("videoPlayer").pause();
-	    	}
-	     	else
-	     	{
-	        	videoPlay(i);
-	    	}
-		}
-	}
-	/* LETS USE ONLY PLAY PAUSE BUTTON WITH 720 *420 ,IT FITS THE SCREEN
-	function makeBig() {
-	    document.getElementById("videoPlayer").width = 560;
-		document.getElementById("videoPlayer").height = 360;
-	}
+        if (event.results[0].isFinal) {
+            micButton.classList.remove('recording');
+            micButton.innerHTML = '<i class="fas fa-microphone"></i>';
+            statusDisplay.textContent = "Speech recognized: " + transcript;
+            statusDisplay.style.color = "var(--accent-color)";
+        }
+    };
 
-	function makeSmall() {
-	    document.getElementById("videoPlayer").width = 320;
-		document.getElementById("videoPlayer").height = 180;
-	}
+    recognition.onerror = function(event) {
+        micButton.classList.remove('recording');
+        micButton.innerHTML = '<i class="fas fa-microphone"></i>';
+        statusDisplay.textContent = "Error: " + event.error;
+        statusDisplay.style.color = "#ff4444";
 
-	function makeNormal() {
-	    document.getElementById("videoPlayer").width = 420;
-		document.getElementById("videoPlayer").height =280;
-	}*/
-	function playPause(){
-  		if (document.getElementById("videoPlayer").paused){
-    		play();}
-  		else{
-    		document.getElementById("videoPlayer").pause();}
-		}
+        // Auto-retry for common errors
+        if (event.error === 'not-allowed') {
+            setTimeout(() => {
+                statusDisplay.textContent = "Please allow microphone access and try again";
+            }, 2000);
+        }
+    };
 
-	</script>
+    recognition.onend = function() {
+        if (micButton.classList.contains('recording')) {
+            micButton.classList.remove('recording');
+            micButton.innerHTML = '<i class="fas fa-microphone"></i>';
+            statusDisplay.textContent = "Recording ended";
+            statusDisplay.style.color = "var(--text-secondary)";
+        }
+    };
 
+    recognition.start();
+}
+
+// Enhanced video playback with better word highlighting
+let currentWordIndex = 0;
+let videoSource = [];
+let isPlaying = false;
+
+function play() {
+    const wordList = document.getElementById('wordList');
+    const words = wordList.getElementsByClassName('word-item');
+    const videoPlayer = document.getElementById('videoPlayer');
+    const playPauseBtn = document.getElementById('playPauseBtn');
+    const statusDisplay = document.getElementById('statusDisplay');
+
+    // Reset previous state
+    currentWordIndex = 0;
+    videoSource = [];
+    isPlaying = true;
+
+    // Clear previous active words
+    for (let i = 0; i < words.length; i++) {
+        words[i].classList.remove('active');
+    }
+
+    // Build video source array
+    for (let j = 0; j < words.length; j++) {
+        const word = words[j].textContent.trim();
+        if (word) {
+            videoSource[j] = "/static/" + word + ".mp4";
+        }
+    }
+
+    if (videoSource.length === 0) {
+        statusDisplay.textContent = "No words to animate";
+        statusDisplay.style.color = "#ff4444";
+        return;
+    }
+
+    statusDisplay.textContent = "Playing animation...";
+    statusDisplay.style.color = "var(--accent-color)";
+    playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+
+    function videoPlay(videoNum) {
+        // Highlight current word
+        for (let i = 0; i < words.length; i++) {
+            words[i].classList.remove('active');
+        }
+
+        if (words[videoNum]) {
+            words[videoNum].classList.add('active');
+        }
+
+        // Scroll word into view
+        if (words[videoNum]) {
+            words[videoNum].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        // Set video source and play
+        videoPlayer.src = videoSource[videoNum];
+        videoPlayer.load();
+
+        videoPlayer.oncanplay = function() {
+            videoPlayer.play().catch(error => {
+                console.error("Video play error:", error);
+                statusDisplay.textContent = "Error playing video: " + error.message;
+                statusDisplay.style.color = "#ff4444";
+            });
+        };
+    }
+
+    videoPlayer.onended = function() {
+        currentWordIndex++;
+        if (currentWordIndex < videoSource.length) {
+            videoPlay(currentWordIndex);
+        } else {
+            // Animation complete
+            isPlaying = false;
+            playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+            statusDisplay.textContent = "Animation complete!";
+            statusDisplay.style.color = "var(--accent-color)";
+
+            // Reset word highlighting
+            for (let i = 0; i < words.length; i++) {
+                words[i].classList.remove('active');
+            }
+        }
+    };
+
+    // Start with first word
+    videoPlay(0);
+}
+
+function playPause() {
+    const videoPlayer = document.getElementById('videoPlayer');
+    const playPauseBtn = document.getElementById('playPauseBtn');
+    const statusDisplay = document.getElementById('statusDisplay');
+
+    if (videoPlayer.paused) {
+        if (videoPlayer.src && currentWordIndex < videoSource.length) {
+            // Continue from where we left off
+            videoPlayer.play().catch(error => {
+                console.error("Play error:", error);
+                statusDisplay.textContent = "Error: " + error.message;
+                statusDisplay.style.color = "#ff4444";
+            });
+            playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+            statusDisplay.textContent = "Playing...";
+            statusDisplay.style.color = "var(--accent-color)";
+            isPlaying = true;
+        } else if (document.getElementById('speechToText').value.trim() || "{{ text }}".trim()) {
+            // Start new animation
+            play();
+        } else {
+            statusDisplay.textContent = "Please enter text first";
+            statusDisplay.style.color = "#ff4444";
+        }
+    } else {
+        videoPlayer.pause();
+        playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+        statusDisplay.textContent = "Paused";
+        statusDisplay.style.color = "var(--text-secondary)";
+        isPlaying = false;
+    }
+}
+
+function stopVideo() {
+    const videoPlayer = document.getElementById('videoPlayer');
+    const playPauseBtn = document.getElementById('playPauseBtn');
+    const statusDisplay = document.getElementById('statusDisplay');
+    const wordList = document.getElementById('wordList');
+    const words = wordList.getElementsByClassName('word-item');
+
+    videoPlayer.pause();
+    videoPlayer.currentTime = 0;
+    videoPlayer.src = "";
+
+    playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+    statusDisplay.textContent = "Stopped";
+    statusDisplay.style.color = "var(--text-secondary)";
+    isPlaying = false;
+    currentWordIndex = 0;
+
+    // Reset word highlighting
+    for (let i = 0; i < words.length; i++) {
+        words[i].classList.remove('active');
+    }
+}
+
+function toggleFullscreen() {
+    const videoPlayer = document.getElementById('videoPlayer');
+
+    if (!document.fullscreenElement) {
+        if (videoPlayer.requestFullscreen) {
+            videoPlayer.requestFullscreen().catch(err => {
+                console.error("Error attempting to enable fullscreen:", err);
+            });
+        }
+    } else {
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
+        }
+    }
+}
+
+// Auto-focus on text input when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    const speechToText = document.getElementById('speechToText');
+    if (speechToText) {
+        speechToText.focus();
+    }
+
+    // Add fade-in animation to all cards
+    const cards = document.querySelectorAll('.card');
+    cards.forEach((card, index) => {
+        card.style.animationDelay = `${index * 0.1}s`;
+    });
+});
+
+// Handle form submission with better feedback
+document.querySelector('form').addEventListener('submit', function(e) {
+    const statusDisplay = document.getElementById('statusDisplay');
+    const textInput = document.getElementById('speechToText');
+
+    if (!textInput.value.trim()) {
+        e.preventDefault();
+        statusDisplay.textContent = "Please enter some text to convert";
+        statusDisplay.style.color = "#ff4444";
+        textInput.focus();
+    } else {
+        statusDisplay.textContent = "Converting text to sign language...";
+        statusDisplay.style.color = "var(--accent-color)";
+    }
+});
+
+// Add keyboard shortcuts
+document.addEventListener('keydown', function(e) {
+    if (e.ctrlKey && e.key === ' ') {
+        e.preventDefault();
+        playPause();
+    } else if (e.key === 'Escape') {
+        stopVideo();
+    }
+});
+</script>
 
 {% endblock %}
