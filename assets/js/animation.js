@@ -105,15 +105,12 @@ function play() {
     isPlaying = true;
 
     videoPlayer.src = window.djangoContext.stitched_video_path;
-    videoPlayer.load();
-
-    videoPlayer.oncanplay = function() {
-        videoPlayer.play().catch(error => {
-            console.error("Video play error:", error);
-            statusDisplay.textContent = "Error playing video: " + error.message;
-            statusDisplay.style.color = "var(--error-color)";
-        });
-    };
+    
+    videoPlayer.play().catch(error => {
+        console.error("Video play error:", error);
+        statusDisplay.textContent = "Error playing video: " + error.message;
+        statusDisplay.style.color = "var(--error-color)";
+    });
 
     videoPlayer.onended = function() {
         isPlaying = false;
