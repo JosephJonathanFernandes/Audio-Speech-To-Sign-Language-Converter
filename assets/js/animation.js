@@ -219,6 +219,11 @@ document.addEventListener('DOMContentLoaded', function() {
     cards.forEach((card, index) => {
         card.style.animationDelay = `${index * 0.1}s`;
     });
+
+    // Autoplay if we just rendered a stitched video
+    if (window.djangoContext && window.djangoContext.stitched_video_path) {
+        play();
+    }
 });
 
 // Handle form submission with better feedback

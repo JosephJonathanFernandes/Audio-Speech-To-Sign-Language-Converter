@@ -19,6 +19,7 @@
                 {% csrf_token %}
                 <div class="text-input-area">
                     <input type="text" name="sen" class="text-input" id="speechToText"
+                           value="{{ text|default:'' }}"
                            placeholder="Type your text here or use the microphone..." autocomplete="off" aria-label="Text to convert to sign language">
                     <button type="button" class="mic-btn" onclick="record()" id="micButton" aria-label="Toggle microphone for speech recognition" title="Click to use microphone">
                         <i class="fas fa-microphone"></i>
