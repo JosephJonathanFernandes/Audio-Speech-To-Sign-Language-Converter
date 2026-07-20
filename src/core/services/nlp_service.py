@@ -2,6 +2,9 @@ import nltk
 from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
 from django.contrib.staticfiles import finders
+import logging
+
+logger = logging.getLogger(__name__)
 
 class NLPService:
     """
@@ -50,56 +53,59 @@ class NLPService:
         """
         if not text:
             return []
+            
+        try:
 
         # Tokenize the sentence
-        words = word_tokenize(text.lower())
-        tagged = nltk.pos_tag(words)
-        
-        tense = self.get_tense(tagged)
-        
-        # Remove stopwords and apply lemmatization
-        filtered_text = []
-        for w, p in zip(words, tagged):
-            if w not in self.stop_words:
-                lemmatized_word = self.lemmatize_word(w, p[1])
-                filtered_text.append(lemmatized_word)
-
-        # Basic pronoun swap and capitalization matching
-        temp = []
-        for w in filtered_text:
-            if w.lower() == 'i':
-                temp.append('Me')
-            else:
-                # Capitalizing the first letter to match file names (e.g., 'Hello.mp4')
-                # Alternatively, preserve original casing if needed. 
-                # The original code did temp.append(w), but checking for 'I'.
-                temp.append(w.capitalize())
-
-        words = temp
-        
-        # Tense adjustment keywords
-        if tense:
-            probable_tense = max(tense, key=tense.get)
-            if probable_tense == "past" and tense["past"] >= 1:
-                words = ["Before"] + words
-            elif probable_tense == "future" and tense["future"] >= 1:
-                if "Will" not in words:
-                    words = ["Will"] + words
-            elif probable_tense == "present":
-                if tense["present_continuous"] >= 1:
-                    words = ["Now"] + words
-
-        # Map to available videos or break down into characters
-        final_animation_sequence = []
-        for w in words:
-            path = "videos/" + w + ".mp4"
-            f = finders.find(path)
+            words = word_tokenize(text.lower())
+            tagged = nltk.pos_tag(words)
             
-            # Splitting the word into characters if its animation is not present in database
-            if not f:
-                for c in w:
-                    final_animation_sequence.append(c.capitalize())
-            else:
-                final_animation_sequence.append(w)
+            tense = self.get_tense(tagged)
+            
+            # Remove stopwords and apply lemmatization
+            filtered_text = []
+            for w, p in zip(words, tagged):
+                if w not in self.stop_words:
+                    lemmatized_word = self.lemmatize_word(w, p[1])
+                    filtered_text.append(lemmatized_word)
 
-        return final_animation_sequence
+            # Basic pronoun swap and capitalization matching
+            temp = []
+            for w in filtered_text:
+                if w.lower() == 'i':
+                    temp.append('Me')
+                else:
+                    temp.append(w.capitalize())
+
+            words = temp
+            
+            # Tense adjustment keywords
+            if tense:
+                probable_tense = max(tense, key=tense.get)
+                if probable_tense == "past" and tense["past"] >= 1:
+                    words = ["Before"] + words
+                elif probable_tense == "future" and tense["future"] >= 1:
+                    if "Will" not in words:
+                        words = ["Will"] + words
+                elif probable_tense == "present":
+                    if tense["present_continuous"] >= 1:
+                        words = ["Now"] + words
+
+            # Map to available videos or break down into characters
+            final_animation_sequence = []
+            for w in words:
+                path = "videos/" + w + ".mp4"
+                f = finders.find(path)
+                
+                # Splitting the word into characters if its animation is not present in database
+                if not f:
+                    for c in w:
+                        final_animation_sequence.append(c.capitalize())
+                else:
+                    final_animation_sequence.append(w)
+
+            return final_animation_sequence
+            
+        except Exception as e:
+            logger.error(f"NLP Processing Error for text '{text}': {str(e)}")
+            return []

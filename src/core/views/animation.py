@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 from src.core.services.nlp_service import NLPService
 
 # Initialize the NLP service
@@ -12,6 +13,9 @@ def animation_view(request):
         
         # Process text using the NLP service
         words = nlp_service.process_text(text)
+        
+        if not words and text:
+            messages.error(request, "Error processing text. Please try again with different words.")
         
         return render(request, 'animation.html', {'words': words, 'text': text})
     else:
