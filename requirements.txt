@@ -3,3 +3,5 @@ nltk>=3.5
 python-dotenv>=1.0.0
 pytest>=7.0.0
 flake8>=6.0.0
+
+moviepy>=1.0.3

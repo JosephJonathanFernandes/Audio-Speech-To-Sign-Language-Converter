@@ -104,7 +104,8 @@
 
 <script>
     const djangoContext = {
-        text: "{{ text|escapejs|default:'' }}"
+        text: "{{ text|escapejs|default:'' }}",
+        stitched_video_path: "{{ stitched_video_path|default:'' }}"
     };
 </script>
 <script src="{% static 'js/animation.js' %}"></script>

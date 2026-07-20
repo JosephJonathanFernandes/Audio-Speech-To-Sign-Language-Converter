@@ -2,7 +2,14 @@ import nltk
 from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
 from django.contrib.staticfiles import finders
+from django.conf import settings
 import logging
+import os
+import uuid
+try:
+    from moviepy.editor import VideoFileClip, concatenate_videoclips
+except ImportError:
+    pass
 
 logger = logging.getLogger(__name__)
 
@@ -109,3 +116,54 @@ class NLPService:
         except Exception as e:
             logger.error(f"NLP Processing Error for text '{text}': {str(e)}")
             return []
+
+    def stitch_video(self, words):
+        """
+        Takes a list of words, finds their videos, and stitches them into a single video.
+        Returns the relative URL to the stitched video.
+        """
+        if not words:
+            return None
+            
+        video_clips = []
+        for w in words:
+            path = finders.find("videos/" + w + ".mp4")
+            if path:
+                try:
+                    clip = VideoFileClip(path)
+                    video_clips.append(clip)
+                except Exception as e:
+                    logger.error(f"Error loading clip {path}: {str(e)}")
+                    
+        if not video_clips:
+            return None
+            
+        try:
+            final_clip = concatenate_videoclips(video_clips, method="compose")
+            
+            filename = f"stitched_{uuid.uuid4().hex}.mp4"
+            output_dir = os.path.join(settings.BASE_DIR, "assets", "videos", "cache")
+            if not os.path.exists(output_dir):
+                os.makedirs(output_dir)
+                
+            output_path = os.path.join(output_dir, filename)
+            
+            # Write the result to a file (using a fast codec and preset for quick generation)
+            final_clip.write_videofile(
+                output_path, 
+                codec="libx264", 
+                audio_codec="aac", 
+                preset="ultrafast",
+                threads=4,
+                logger=None
+            )
+            
+            # Close clips to free memory
+            for clip in video_clips:
+                clip.close()
+            final_clip.close()
+            
+            return f"/static/videos/cache/{filename}"
+        except Exception as e:
+            logger.error(f"Error stitching video: {str(e)}")
+            return None

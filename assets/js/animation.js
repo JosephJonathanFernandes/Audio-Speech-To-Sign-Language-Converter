@@ -72,105 +72,63 @@ function record() {
     recognition.start();
 }
 
-// Enhanced video playback with better word highlighting
-let currentWordIndex = 0;
-let videoSource = [];
+// Enhanced video playback for stitched seamless videos
 let isPlaying = false;
 
 function play() {
-    const wordList = document.getElementById('wordList');
-    const words = wordList.getElementsByClassName('word-item');
     const videoPlayer = document.getElementById('videoPlayer');
     const playPauseBtn = document.getElementById('playPauseBtn');
     const statusDisplay = document.getElementById('statusDisplay');
+    const wordList = document.getElementById('wordList');
+    const words = wordList ? wordList.getElementsByClassName('word-item') : [];
 
-    // Reset previous state
-    currentWordIndex = 0;
-    videoSource = [];
-    isPlaying = true;
-    
     // UI HCD Updates
     const videoEmptyState = document.getElementById('videoEmptyState');
     if (videoEmptyState) videoEmptyState.style.display = 'none';
     videoPlayer.style.display = 'block';
 
-    // Clear previous active words
+    // Highlight all words to show they are in the video
     for (let i = 0; i < words.length; i++) {
-        words[i].classList.remove('active');
+        words[i].classList.add('active');
     }
 
-    // Build video source array
-    for (let j = 0; j < words.length; j++) {
-        const word = words[j].textContent.trim();
-        if (word && word !== "Words will appear here after conversion") {
-            videoSource[j] = "/static/videos/" + word + ".mp4";
-        }
-    }
-
-    // Filter out undefined spots if any
-    videoSource = videoSource.filter(src => src !== undefined);
-
-    if (videoSource.length === 0) {
-        statusDisplay.textContent = "No words to animate";
+    if (!window.djangoContext || !window.djangoContext.stitched_video_path) {
+        statusDisplay.textContent = "No stitched video available to animate";
         statusDisplay.style.color = "var(--error-color)";
-        if (typeof showToast === 'function') showToast('No words to animate', 'warning');
+        if (typeof showToast === 'function') showToast('No stitched video available', 'warning');
         return;
     }
 
     statusDisplay.textContent = "Playing animation...";
     statusDisplay.style.color = "var(--accent-color)";
     playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+    isPlaying = true;
 
-    function videoPlay(videoNum) {
-        // Highlight current word
+    videoPlayer.src = window.djangoContext.stitched_video_path;
+    videoPlayer.load();
+
+    videoPlayer.oncanplay = function() {
+        videoPlayer.play().catch(error => {
+            console.error("Video play error:", error);
+            statusDisplay.textContent = "Error playing video: " + error.message;
+            statusDisplay.style.color = "var(--error-color)";
+        });
+    };
+
+    videoPlayer.onended = function() {
+        isPlaying = false;
+        playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+        statusDisplay.textContent = "Animation complete!";
+        statusDisplay.style.color = "var(--accent-color)";
+        
         for (let i = 0; i < words.length; i++) {
             words[i].classList.remove('active');
         }
 
-        if (words[videoNum]) {
-            words[videoNum].classList.add('active');
-            // Scroll word into view
-            words[videoNum].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        }
-
-        // Set video source and play
-        videoPlayer.src = videoSource[videoNum];
-        videoPlayer.load();
-
-        videoPlayer.oncanplay = function() {
-            videoPlayer.play().catch(error => {
-                console.error("Video play error:", error);
-                statusDisplay.textContent = "Error playing video: " + error.message;
-                statusDisplay.style.color = "var(--error-color)";
-            });
-        };
-    }
-
-    videoPlayer.onended = function() {
-        currentWordIndex++;
-        if (currentWordIndex < videoSource.length) {
-            videoPlay(currentWordIndex);
-        } else {
-            // Animation complete
-            isPlaying = false;
-            playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
-            statusDisplay.textContent = "Animation complete!";
-            statusDisplay.style.color = "var(--accent-color)";
-
-            // Reset word highlighting
-            for (let i = 0; i < words.length; i++) {
-                words[i].classList.remove('active');
-            }
-            
-            // Restore Empty State
-            const videoEmptyState = document.getElementById('videoEmptyState');
-            if (videoEmptyState) videoEmptyState.style.display = 'flex';
-            videoPlayer.style.display = 'none';
-        }
+        // Restore Empty State
+        if (videoEmptyState) videoEmptyState.style.display = 'flex';
+        videoPlayer.style.display = 'none';
     };
-
-    // Start with first word
-    videoPlay(0);
 }
 
 function playPause() {
@@ -179,8 +137,8 @@ function playPause() {
     const statusDisplay = document.getElementById('statusDisplay');
 
     if (videoPlayer.paused) {
-        if (videoPlayer.src && currentWordIndex < videoSource.length) {
-            // Continue from where we left off
+        if (videoPlayer.src && videoPlayer.currentTime > 0) {
+            // Continue
             videoPlayer.play().catch(error => {
                 console.error("Play error:", error);
                 statusDisplay.textContent = "Error: " + error.message;
@@ -190,8 +148,7 @@ function playPause() {
             statusDisplay.textContent = "Playing...";
             statusDisplay.style.color = "var(--accent-color)";
             isPlaying = true;
-        } else if (document.getElementById('speechToText').value.trim() || (window.djangoContext && window.djangoContext.text.trim())) {
-            // Start new animation
+        } else if (window.djangoContext && window.djangoContext.stitched_video_path) {
             play();
         } else {
             statusDisplay.textContent = "Please enter text first";
@@ -212,7 +169,7 @@ function stopVideo() {
     const playPauseBtn = document.getElementById('playPauseBtn');
     const statusDisplay = document.getElementById('statusDisplay');
     const wordList = document.getElementById('wordList');
-    const words = wordList.getElementsByClassName('word-item');
+    const words = wordList ? wordList.getElementsByClassName('word-item') : [];
 
     videoPlayer.pause();
     videoPlayer.currentTime = 0;
@@ -222,7 +179,6 @@ function stopVideo() {
     statusDisplay.textContent = "Stopped";
     statusDisplay.style.color = "var(--text-secondary)";
     isPlaying = false;
-    currentWordIndex = 0;
     
     // Restore Empty State
     const videoEmptyState = document.getElementById('videoEmptyState');

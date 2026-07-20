@@ -15,7 +15,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from src.core.views import home, auth, animation
+from src.core.views import home, auth, animation, dashboard
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -32,4 +32,5 @@ urlpatterns = [
     
     # Core Application
     path('animation/', animation.animation_view, name='animation'),
+    path('dashboard/', dashboard.dashboard_view, name='dashboard'),
 ]
