@@ -20,13 +20,14 @@
                 <div class="text-input-area">
                     <input type="text" name="sen" class="text-input" id="speechToText"
                            placeholder="Type your text here or use the microphone..." autocomplete="off" aria-label="Text to convert to sign language">
-                    <button type="button" class="mic-btn" onclick="record()" id="micButton" aria-label="Toggle microphone for speech recognition">
+                    <button type="button" class="mic-btn" onclick="record()" id="micButton" aria-label="Toggle microphone for speech recognition" title="Click to use microphone">
                         <i class="fas fa-microphone"></i>
                     </button>
                     <button type="submit" class="btn" aria-label="Convert text to sign language">
                         <i class="fas fa-play"></i> Convert
                     </button>
                 </div>
+                <span class="input-help-text" id="micHelperText"><i class="fas fa-info-circle"></i> Requires microphone permissions</span>
             </form>
 
             <div class="card mb-3">
@@ -52,8 +53,8 @@
                                 <div class="word-item" id="word-{{ forloop.counter0 }}">{{ word }}</div>
                             {% endfor %}
                         {% else %}
-                            <div class="word-item" style="flex: 1; min-width: 100%; justify-content: center;">
-                                Words will appear here after conversion
+                            <div class="word-item" style="flex: 1; min-width: 100%; justify-content: center; background: rgba(255, 255, 255, 0.02); color: var(--text-secondary); border-style: dashed;">
+                                <i class="fas fa-keyboard"></i> Awaiting Input...
                             </div>
                         {% endif %}
                     </div>
@@ -67,8 +68,13 @@
                 <h3>Sign Language Animation</h3>
             </div>
 
-            <div class="video-container">
-                <video id="videoPlayer" class="video-player" preload="auto">
+            <div class="video-container" id="videoContainer">
+                <div class="video-empty-state" id="videoEmptyState">
+                    <i class="fas fa-sign-language"></i>
+                    <h4 style="margin: 0; color: var(--text-primary);">Awaiting Animation</h4>
+                    <p style="font-size: 0.9rem;">Submit text or use the microphone to generate ISL</p>
+                </div>
+                <video id="videoPlayer" class="video-player" preload="auto" title="Sign Language Video Player">
                     <source src="" type="video/mp4">
                     Your browser does not support HTML5 video.
                 </video>
@@ -86,9 +92,9 @@
                 </button>
             </div>
 
-            <div class="mt-3 text-center">
+            <div class="mt-3 text-center" aria-live="polite" aria-atomic="true">
                 <div class="form-label">Animation Status:</div>
-                <div id="statusDisplay" style="font-weight: 500; color: var(--accent-color);">
+                <div id="statusDisplay" style="font-weight: 500; color: var(--accent-cyan);">
                     Ready to convert text to sign language
                 </div>
             </div>

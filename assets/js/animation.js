@@ -88,6 +88,11 @@ function play() {
     currentWordIndex = 0;
     videoSource = [];
     isPlaying = true;
+    
+    // UI HCD Updates
+    const videoEmptyState = document.getElementById('videoEmptyState');
+    if (videoEmptyState) videoEmptyState.style.display = 'none';
+    videoPlayer.style.display = 'block';
 
     // Clear previous active words
     for (let i = 0; i < words.length; i++) {
@@ -156,6 +161,11 @@ function play() {
             for (let i = 0; i < words.length; i++) {
                 words[i].classList.remove('active');
             }
+            
+            // Restore Empty State
+            const videoEmptyState = document.getElementById('videoEmptyState');
+            if (videoEmptyState) videoEmptyState.style.display = 'flex';
+            videoPlayer.style.display = 'none';
         }
     };
 
@@ -213,6 +223,11 @@ function stopVideo() {
     statusDisplay.style.color = "var(--text-secondary)";
     isPlaying = false;
     currentWordIndex = 0;
+    
+    // Restore Empty State
+    const videoEmptyState = document.getElementById('videoEmptyState');
+    if (videoEmptyState) videoEmptyState.style.display = 'flex';
+    videoPlayer.style.display = 'none';
 
     // Reset word highlighting
     for (let i = 0; i < words.length; i++) {
