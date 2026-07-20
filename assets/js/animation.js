@@ -105,6 +105,7 @@ function play() {
     isPlaying = true;
 
     videoPlayer.src = window.djangoContext.stitched_video_path;
+    videoPlayer.load();
     
     videoPlayer.play().catch(error => {
         console.error("Video play error:", error);
