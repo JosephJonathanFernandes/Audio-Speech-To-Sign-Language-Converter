@@ -24,8 +24,9 @@
                     <button type="button" class="mic-btn" onclick="record()" id="micButton" aria-label="Toggle microphone for speech recognition" title="Click to use microphone">
                         <i class="fas fa-microphone"></i>
                     </button>
-                    <button type="submit" class="btn" aria-label="Convert text to sign language">
-                        <i class="fas fa-play"></i> Convert
+                    <button type="submit" id="submitBtn" class="btn btn-primary" style="width: 100%; display: flex; justify-content: center; align-items: center; gap: 0.5rem;">
+                        <span class="spinner" id="convertSpinner" style="display: none;"></span>
+                        <i class="fas fa-magic" id="convertIcon"></i> <span id="convertText">Convert to Sign Language</span>
                     </button>
                 </div>
                 <span class="input-help-text" id="micHelperText"><i class="fas fa-info-circle"></i> Requires microphone permissions</span>

@@ -229,6 +229,9 @@ document.querySelector('form').addEventListener('submit', function(e) {
     const statusDisplay = document.getElementById('statusDisplay');
     const textInput = document.getElementById('speechToText');
     const submitBtn = this.querySelector('button[type="submit"]');
+    const spinner = document.getElementById('convertSpinner');
+    const icon = document.getElementById('convertIcon');
+    const text = document.getElementById('convertText');
 
     if (!textInput.value.trim()) {
         e.preventDefault();
@@ -238,7 +241,10 @@ document.querySelector('form').addEventListener('submit', function(e) {
         textInput.focus();
     } else {
         // Show loading state
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Converting...';
+        if (spinner) spinner.style.display = 'inline-block';
+        if (icon) icon.style.display = 'none';
+        if (text) text.textContent = 'Processing...';
+        
         submitBtn.style.opacity = '0.8';
         submitBtn.style.cursor = 'not-allowed';
         

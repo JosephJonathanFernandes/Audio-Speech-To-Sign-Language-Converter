@@ -41,7 +41,10 @@
 
     <nav class="navbar">
         <div class="nav-container">
-            <ul class="nav-list">
+            <button class="mobile-menu-toggle" id="mobileMenuBtn" aria-label="Toggle navigation menu">
+                <i class="fas fa-bars"></i>
+            </button>
+            <ul class="nav-list" id="navLinks">
                 <li class="nav-item">
                     <a href="{% url 'home' %}" class="nav-link {% if request.path == '/' %}active{% endif %}">
                         <i class="fas fa-home"></i> Home

@@ -53,6 +53,25 @@ document.addEventListener('DOMContentLoaded', function() {
             themeToggle.innerHTML = `<i class="fas fa-moon" id="themeIcon"></i> Dark Mode`;
         }
     }
+    
+    // Mobile Menu Toggle Logic
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const navLinksList = document.getElementById('navLinks');
+    
+    if (mobileMenuBtn && navLinksList) {
+        mobileMenuBtn.addEventListener('click', function() {
+            navLinksList.classList.toggle('active');
+            // Change icon from bars to times
+            const icon = mobileMenuBtn.querySelector('i');
+            if (navLinksList.classList.contains('active')) {
+                icon.classList.remove('fa-bars');
+                icon.classList.add('fa-times');
+            } else {
+                icon.classList.remove('fa-times');
+                icon.classList.add('fa-bars');
+            }
+        });
+    }
 });
 
 // Toast Notification System
