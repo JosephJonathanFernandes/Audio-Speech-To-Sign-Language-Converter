@@ -22,6 +22,28 @@
     --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
 }
 
+:root[data-theme="light"] {
+    /* Light Mode Premium Palette */
+    --bg-base: #f8f9fa;
+    --bg-surface: rgba(255, 255, 255, 0.6);
+    --bg-glass: rgba(255, 255, 255, 0.7);
+    
+    --primary-neon: #7928CA;
+    --secondary-neon: #FF0080;
+    --accent-cyan: #00b3ad; /* Darker cyan for light mode contrast */
+    
+    --text-primary: #1a1a1a;
+    --text-secondary: rgba(0, 0, 0, 0.6);
+    
+    --border-glass: rgba(0, 0, 0, 0.08);
+    --border-highlight: rgba(0, 0, 0, 0.15);
+    
+    --error-color: #ff4444;
+    --success-color: #00C851;
+    
+    --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
+}
+
 * {
     margin: 0;
     padding: 0;
