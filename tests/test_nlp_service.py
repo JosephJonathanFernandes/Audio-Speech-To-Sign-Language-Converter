@@ -29,6 +29,6 @@ def test_process_text_empty(nlp_service):
 
 def test_process_text_simple(nlp_service):
     """Test processing of a simple present tense sentence."""
-    # Assuming "hello" maps to "Hello.mp4" (depends on Django finders, but we can test logic).
+    # Assuming "hello" maps to "videos/Hello.mp4" (depends on Django finders, but we can test logic).
     # Since `finders` is a Django utility, it will fail unless Django is configured.
     pass

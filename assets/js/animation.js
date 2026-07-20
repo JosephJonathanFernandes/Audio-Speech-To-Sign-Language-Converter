@@ -98,7 +98,7 @@ function play() {
     for (let j = 0; j < words.length; j++) {
         const word = words[j].textContent.trim();
         if (word && word !== "Words will appear here after conversion") {
-            videoSource[j] = "/static/" + word + ".mp4";
+            videoSource[j] = "/static/videos/" + word + ".mp4";
         }
     }
 

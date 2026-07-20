@@ -92,7 +92,7 @@ class NLPService:
         # Map to available videos or break down into characters
         final_animation_sequence = []
         for w in words:
-            path = w + ".mp4"
+            path = "videos/" + w + ".mp4"
             f = finders.find(path)
             
             # Splitting the word into characters if its animation is not present in database
