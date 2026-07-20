@@ -1,16 +1,58 @@
 {% extends 'base.html' %}
 
-
 {% block content %}
-<div class="form-style">
-	<h1>Log in</h1>
-	<form class="site-form" action="." method="post">
-		{% csrf_token %}
-		{{ form }}
-		{% if request.GET.next %}
-			<input type="hidden" name="next" value="{{ request.GET.next }}">
-		{% endif %}
-		<input class="submit" type="submit" value="Log in">
-	</form>
+<div class="fade-in" style="max-width: 500px; margin: 0 auto;">
+    <div class="card">
+        <div class="card-title" style="justify-content: center;">
+            <i class="fas fa-sign-in-alt"></i>
+            <h2>Log In</h2>
+        </div>
+        
+        <form class="site-form" action="." method="post">
+            {% csrf_token %}
+            <div class="form-container">
+                {{ form.as_p }}
+            </div>
+            {% if request.GET.next %}
+                <input type="hidden" name="next" value="{{ request.GET.next }}">
+            {% endif %}
+            <button type="submit" class="btn btn-secondary" style="width: 100%; margin-top: 1rem;">
+                <i class="fas fa-sign-in-alt"></i> Log In
+            </button>
+        </form>
+    </div>
 </div>
+
+<style>
+    .form-container p {
+        margin-bottom: 1.5rem;
+    }
+    .form-container label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        color: var(--text-secondary);
+    }
+    .form-container input[type="text"],
+    .form-container input[type="password"],
+    .form-container input[type="email"],
+    .form-container textarea,
+    .form-container select {
+        width: 100%;
+        padding: 0.8rem 1rem;
+        background-color: var(--background-light);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        color: var(--text-primary);
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+    .form-container input:focus,
+    .form-container textarea:focus,
+    .form-container select:focus {
+        outline: none;
+        border-color: var(--accent-color);
+        box-shadow: 0 0 0 3px rgba(3, 218, 198, 0.2);
+    }
+</style>
 {% endblock %}
