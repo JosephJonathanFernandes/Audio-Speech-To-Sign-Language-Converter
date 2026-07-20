@@ -148,14 +148,14 @@ class NLPService:
                 
             output_path = os.path.join(output_dir, filename)
             
-            # Write the result to a file (using a fast codec and preset for quick generation)
+            # Write the stitched video, forcing yuv420p pixel format for browser compatibility
             final_clip.write_videofile(
-                output_path, 
-                codec="libx264", 
-                audio_codec="aac", 
+                output_path,
+                codec="libx264",
+                audio_codec="aac",
                 preset="ultrafast",
-                threads=4,
-                logger=None
+                logger=None,
+                ffmpeg_params=["-pix_fmt", "yuv420p"]
             )
             
             # Close clips to free memory
